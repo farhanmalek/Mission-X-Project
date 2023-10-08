@@ -17,6 +17,7 @@ router.post('/filter', (req, res) => {
   const subjectMatter = req.body.subjectMatter;
   const difficulty = req.body.difficulty;
   const yearLevel = req.body.yearLevel;
+  
 
   //Set up base query 
   let query = 'SELECT project_id,name,project_pic,activity_type,year_level,course,subscription,subject_matter FROM project';
@@ -24,6 +25,7 @@ router.post('/filter', (req, res) => {
   // Empty arrays that will store conditions and values
   const conditions = [];
   const values = [];
+
 
   //Check if each filter has been passed through, ie. has the checkbox been selected.
   //If so, push the condition in the condition array and value in value array.
@@ -42,24 +44,23 @@ router.post('/filter', (req, res) => {
     conditions.push(`subject_matter IN (${placeholders})`);
     values.push(...subjectMatter);
   }
-  if (difficulty && difficulty.length > 0) {
-    const placeholders = Array.from({ length: difficulty.length },() => '?').join(',');
-    conditions.push(`course IN (${placeholders})`);
-    values.push(...difficulty);
+  if (difficulty) {
+    conditions.push(`course = ?`);
+    values.push(difficulty);
   }
 
-  if(yearLevel && yearLevel.length > 0) {
-    const placeholders = Array.from({ length: yearLevel.length },() => '?').join(',');
-    conditions.push(`year_level IN (${placeholders}) `);
-    values.push(...yearLevel)
-  }
-
+  // if(yearLevel && yearLevel.length > 0) {
+  //   const placeholders = Array.from({ length: yearLevel.length },() => '?').join(',');
+  //   conditions.push(`year_level IN (${placeholders}) `);
+  //   values.push(...yearLevel)
+  // }
   //If any filters have been selected and sent through, link the query up.
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
-
+;
   pool.query(query, values, (err, result) => {
+    console.log(values)
     if (err) throw err;
     res.send(result);
   });
