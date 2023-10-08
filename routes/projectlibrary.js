@@ -17,15 +17,13 @@ router.post('/filter', (req, res) => {
   const subjectMatter = req.body.subjectMatter;
   const difficulty = req.body.difficulty;
   const yearLevel = req.body.yearLevel;
-  
-
   //Set up base query 
   let query = 'SELECT project_id,name,project_pic,activity_type,year_level,course,subscription,subject_matter FROM project';
 
   // Empty arrays that will store conditions and values
   const conditions = [];
   const values = [];
-
+  const newCond = [];
 
   //Check if each filter has been passed through, ie. has the checkbox been selected.
   //If so, push the condition in the condition array and value in value array.
@@ -49,18 +47,30 @@ router.post('/filter', (req, res) => {
     values.push(difficulty);
   }
 
-  // if(yearLevel && yearLevel.length > 0) {
-  //   const placeholders = Array.from({ length: yearLevel.length },() => '?').join(',');
-  //   conditions.push(`year_level IN (${placeholders}) `);
-  //   values.push(...yearLevel)
-  // }
-  //If any filters have been selected and sent through, link the query up.
   if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
+    query += " WHERE " + conditions.join(" AND "); 
   }
+
+  if(yearLevel && yearLevel.length > 0) { 
+    const flattenedArray = [].concat.apply([], yearLevel);
+    if (conditions.length === 0) {
+      for (let i = 0; i < flattenedArray.length; i+=2) {
+        newCond.push(` year_level BETWEEN ${flattenedArray[i]} AND ${flattenedArray[i+1]} `)
+      }
+      query += " WHERE " + newCond.join(" OR ");
+    } else {
+      for (let i = 0; i < flattenedArray.length; i+=2) {
+        newCond.push(` year_level BETWEEN ${flattenedArray[i]} AND ${flattenedArray[i+1]} `)
+      }
+      query +=" AND " + newCond.join(" OR ");
+    }
+  }
+  // //If any filters have been selected and sent through, link the query up.
+  // if (conditions.length > 0) {
+  //   query += " WHERE " + conditions.join(" AND "); 
+  // }
 ;
   pool.query(query, values, (err, result) => {
-    console.log(values)
     if (err) throw err;
     res.send(result);
   });
