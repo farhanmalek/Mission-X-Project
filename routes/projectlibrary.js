@@ -2,28 +2,21 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../database")
 
-//Create main project library route, where all projects are initially displayed
-router.get('/',(req,res) => {
-  pool.query("SELECT * FROM project", (err,results) => {
-    if (err) throw (err);
-    res.json(results)
-  })
-})
-
-router.post('/filter', (req, res) => {
+router.post('/', (req, res) => {
   //Get requests and put them in their respective arrays
   const subscription = req.body.subscription;
   const activityType = req.body.activityType;
   const subjectMatter = req.body.subjectMatter;
   const difficulty = req.body.difficulty;
   const yearLevel = req.body.yearLevel;
+  const limit = req.body.limit;
   //Set up base query 
   let query = 'SELECT project_id,name,project_pic,activity_type,year_level,course,subscription,subject_matter FROM project';
 
   // Empty arrays that will store conditions and values
   const conditions = [];
   const values = [];
-  const newCond = [];
+  // const newCond = [];
 
   //Check if each filter has been passed through, ie. has the checkbox been selected.
   //If so, push the condition in the condition array and value in value array.
@@ -51,25 +44,28 @@ router.post('/filter', (req, res) => {
     query += " WHERE " + conditions.join(" AND "); 
   }
 
-  if(yearLevel && yearLevel.length > 0) { 
+  //set last due to or condition  [[1,4],[5,6]]
+  if (yearLevel && yearLevel.length > 0) {
     const flattenedArray = [].concat.apply([], yearLevel);
+    const newCond = [];
+  
+    for (let i = 0; i < flattenedArray.length; i += 2) {
+      newCond.push(` year_level BETWEEN ${flattenedArray[i]} AND ${flattenedArray[i + 1]} `);
+    }
+  
     if (conditions.length === 0) {
-      for (let i = 0; i < flattenedArray.length; i+=2) {
-        newCond.push(` year_level BETWEEN ${flattenedArray[i]} AND ${flattenedArray[i+1]} `)
-      }
       query += " WHERE " + newCond.join(" OR ");
     } else {
-      for (let i = 0; i < flattenedArray.length; i+=2) {
-        newCond.push(` year_level BETWEEN ${flattenedArray[i]} AND ${flattenedArray[i+1]} `)
-      }
-      query +=" AND " + newCond.join(" OR ");
+      query += " AND " + newCond.join(" OR ");
     }
   }
-  // //If any filters have been selected and sent through, link the query up.
-  // if (conditions.length > 0) {
-  //   query += " WHERE " + conditions.join(" AND "); 
-  // }
-;
+  
+
+//Set Limit
+if (Number.isInteger(limit)) {
+  query +=` LIMIT ${limit}`
+}
+
   pool.query(query, values, (err, result) => {
     if (err) throw err;
     res.send(result);
