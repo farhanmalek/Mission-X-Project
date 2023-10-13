@@ -16,25 +16,23 @@ router.post('/', (req, res) => {
   // Empty arrays that will store conditions and values
   const conditions = [];
   const values = [];
-  // const newCond = [];
 
   //Check if each filter has been passed through, ie. has the checkbox been selected.
   //If so, push the condition in the condition array and value in value array.
   //The placeholders creates a new array full of ???, it will calculates how many ? we need based on the length of the array.
   if (subscription && subscription.length > 0) {
-    const subArray = (typeof subscription === "string") ? [subscription] : subscription;
+
     const placeholders = Array.from({ length: subArray.length }, () => '?').join(',');
     conditions.push(`subscription IN (${placeholders})`);
     values.push(...subArray);
   }
   if (activityType && activityType.length > 0) {
-    const activityArray = (typeof activityType === "string") ? [activityType] : activityType;
+
     const placeholders = Array.from({ length: activityArray.length },() => '?').join(',');
     conditions.push(`activity_type IN (${placeholders})`);
     values.push(...activityArray);
   }
   if (subjectMatter && subjectMatter.length > 0) {
-    const subjectArray = (typeof subjectMatter === "string") ? [subjectMatter] : subjectMatter;
     const placeholders = Array.from({ length: subjectArray.length },() => '?').join(',');
     conditions.push(`subject_matter IN (${placeholders})`);
     values.push(...subjectArray);
