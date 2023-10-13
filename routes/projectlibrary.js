@@ -22,20 +22,20 @@ router.post('/', (req, res) => {
   //The placeholders creates a new array full of ???, it will calculates how many ? we need based on the length of the array.
   if (subscription && subscription.length > 0) {
 
-    const placeholders = Array.from({ length: subArray.length }, () => '?').join(',');
+    const placeholders = Array.from({ length: subscription.length }, () => '?').join(',');
     conditions.push(`subscription IN (${placeholders})`);
-    values.push(...subArray);
+    values.push(...subscription);
   }
   if (activityType && activityType.length > 0) {
 
-    const placeholders = Array.from({ length: activityArray.length },() => '?').join(',');
+    const placeholders = Array.from({ length: activityType.length },() => '?').join(',');
     conditions.push(`activity_type IN (${placeholders})`);
-    values.push(...activityArray);
+    values.push(...activityType);
   }
   if (subjectMatter && subjectMatter.length > 0) {
-    const placeholders = Array.from({ length: subjectArray.length },() => '?').join(',');
+    const placeholders = Array.from({ length: subjectMatter.length },() => '?').join(',');
     conditions.push(`subject_matter IN (${placeholders})`);
-    values.push(...subjectArray);
+    values.push(...subjectMatter);
   }
   if (difficulty) {
     conditions.push(`course = ?`);
