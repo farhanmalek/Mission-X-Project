@@ -69,7 +69,6 @@ if (Number.isInteger(limit)) {
 }
 
   pool.query(query, values, (err, result) => {
-    console.log(query)
     if (err) throw err;
     res.send(result);
   });
